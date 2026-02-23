@@ -21,16 +21,26 @@ import {
   FiXCircle, FiTrendingUp, FiTrendingDown, FiMessageCircle, FiImage,
   FiZoomIn, FiZoomOut, FiFilter, FiChevronDown, FiChevronUp, FiMenu,
   FiActivity, FiEye, FiInfo, FiArrowLeft, FiLoader, FiAlertCircle,
-  FiRefreshCw, FiTrash2, FiList, FiGrid, FiMaximize2
+  FiRefreshCw, FiTrash2, FiList, FiGrid, FiMaximize2,
+  FiCrosshair, FiCpu, FiFileText, FiTarget, FiLayers, FiBox, FiAperture, FiDisc
 } from 'react-icons/fi'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, LineChart, Line, Cell
+  CartesianGrid, LineChart, Line, Cell, PieChart, Pie
 } from 'recharts'
 
 // --- Constants ---
 const DEFECT_DETECTION_AGENT_ID = '699c70cd3aff77bf1a4ebe04'
 const INSPECTION_ADVISOR_AGENT_ID = '699c70cdf75ee4297f34ba9e'
+
+// --- Pipeline Steps ---
+const PIPELINE_STEPS = [
+  { label: 'Upload', icon: FiUpload, description: 'Uploading image' },
+  { label: 'Scan', icon: FiCrosshair, description: 'Scanning object' },
+  { label: 'Identify', icon: FiSearch, description: 'Identifying material' },
+  { label: 'Detect', icon: FiAlertTriangle, description: 'Detecting defects' },
+  { label: 'Report', icon: FiFileText, description: 'Generating report' },
+]
 
 // --- Interfaces ---
 interface Defect {
@@ -229,6 +239,14 @@ function getSeverityColor(severity: string): string {
   return 'bg-gray-100 text-gray-800 border-gray-200'
 }
 
+function getSeverityBorderColor(severity: string): string {
+  const s = (severity ?? '').toLowerCase()
+  if (s === 'critical') return '#ef4444'
+  if (s === 'major') return '#f97316'
+  if (s === 'minor') return '#eab308'
+  return '#9ca3af'
+}
+
 function getVerdictColor(verdict: string): string {
   const v = (verdict ?? '').toLowerCase()
   if (v === 'pass') return 'bg-green-100 text-green-800 border-green-300'
@@ -263,6 +281,156 @@ function formatDate(dateStr: string): string {
   } catch {
     return dateStr
   }
+}
+
+// --- Process Pipeline Component ---
+function ProcessPipeline({ currentStep, isComplete }: { currentStep: number; isComplete: boolean }) {
+  return (
+    <div className="w-full py-4">
+      <div className="flex items-center justify-between relative">
+        {PIPELINE_STEPS.map((step, idx) => {
+          const Icon = step.icon
+          const isActive = idx === currentStep && !isComplete
+          const isDone = idx < currentStep || isComplete
+          const isPending = idx > currentStep && !isComplete
+
+          return (
+            <React.Fragment key={step.label}>
+              <div className="flex flex-col items-center z-10 relative" style={{ flex: '0 0 auto' }}>
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${isDone ? 'bg-green-500 text-white shadow-md shadow-green-500/25' : isActive ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30 animate-pulse' : 'bg-muted text-muted-foreground'}`}
+                >
+                  {isDone ? <FiCheckCircle size={18} /> : <Icon size={18} />}
+                </div>
+                <span className={`text-xs mt-1.5 font-medium transition-colors duration-300 ${isDone ? 'text-green-600' : isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                  {step.label}
+                </span>
+                {isActive && (
+                  <span className="text-[10px] text-primary mt-0.5 animate-pulse">{step.description}</span>
+                )}
+              </div>
+              {idx < PIPELINE_STEPS.length - 1 && (
+                <div className="flex-1 mx-1 relative" style={{ height: '2px', marginBottom: '24px' }}>
+                  <div className="absolute inset-0 bg-muted rounded-full" />
+                  <div
+                    className="absolute inset-y-0 left-0 bg-green-500 rounded-full transition-all duration-700"
+                    style={{ width: isDone ? '100%' : isActive ? '50%' : '0%' }}
+                  />
+                </div>
+              )}
+            </React.Fragment>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// --- Scan Overlay Component ---
+function ScanOverlay() {
+  return (
+    <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden rounded-lg">
+      <div className="absolute inset-0 bg-primary/5" />
+      <div
+        className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent opacity-80"
+        style={{
+          animation: 'scanline 2.5s linear infinite',
+        }}
+      />
+      <div className="absolute inset-0 border-2 rounded-lg" style={{ animation: 'pulse-border 2s ease-in-out infinite' }} />
+      <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl-md opacity-70" />
+      <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr-md opacity-70" />
+      <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-primary rounded-bl-md opacity-70" />
+      <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-primary rounded-br-md opacity-70" />
+    </div>
+  )
+}
+
+// --- How It Works Flow ---
+function HowItWorksFlow() {
+  const steps = [
+    { icon: FiUpload, label: 'Upload', desc: 'Upload fabric image' },
+    { icon: FiCrosshair, label: 'Scan', desc: 'AI scans the material' },
+    { icon: FiSearch, label: 'Identify', desc: 'Material recognized' },
+    { icon: FiTarget, label: 'Detect', desc: 'Defects identified' },
+  ]
+
+  return (
+    <Card className="backdrop-blur-[16px] bg-white/75 border border-white/[0.18] shadow-md">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <FiCpu size={16} className="text-primary" />
+          How AI Inspection Works
+        </CardTitle>
+        <CardDescription className="text-xs">Our ML pipeline analyzes textiles in 4 steps</CardDescription>
+      </CardHeader>
+      <CardContent className="pb-5">
+        <div className="flex items-center justify-between">
+          {steps.map((step, idx) => {
+            const Icon = step.icon
+            return (
+              <React.Fragment key={step.label}>
+                <div className="flex flex-col items-center text-center flex-shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-1.5">
+                    <Icon size={18} className="text-primary" />
+                  </div>
+                  <span className="text-xs font-medium text-foreground">{step.label}</span>
+                  <span className="text-[10px] text-muted-foreground mt-0.5 max-w-[80px] leading-tight">{step.desc}</span>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div className="flex-1 mx-2 flex items-center" style={{ marginBottom: '28px' }}>
+                    <div className="w-full h-px bg-border relative">
+                      <FiChevronRight size={12} className="absolute -right-1 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// --- Defect Heatmap Bar ---
+function DefectHeatmapBar({ critical, major, minor }: { critical: number; major: number; minor: number }) {
+  const total = critical + major + minor
+  if (total === 0) return null
+  const critPct = (critical / total) * 100
+  const majPct = (major / total) * 100
+  const minPct = (minor / total) * 100
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>Defect Distribution</span>
+        <span>{total} total</span>
+      </div>
+      <div className="flex h-2.5 rounded-full overflow-hidden bg-muted">
+        {critPct > 0 && (
+          <div className="bg-red-500 transition-all duration-500" style={{ width: `${critPct}%` }} title={`Critical: ${critical}`} />
+        )}
+        {majPct > 0 && (
+          <div className="bg-orange-500 transition-all duration-500" style={{ width: `${majPct}%` }} title={`Major: ${major}`} />
+        )}
+        {minPct > 0 && (
+          <div className="bg-yellow-500 transition-all duration-500" style={{ width: `${minPct}%` }} title={`Minor: ${minor}`} />
+        )}
+      </div>
+      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+        {critPct > 0 && (
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" />Critical {Math.round(critPct)}%</span>
+        )}
+        {majPct > 0 && (
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" />Major {Math.round(majPct)}%</span>
+        )}
+        {minPct > 0 && (
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500" />Minor {Math.round(minPct)}%</span>
+        )}
+      </div>
+    </div>
+  )
 }
 
 // --- Quality Score Ring ---
@@ -503,6 +671,9 @@ function DashboardScreen({
         <StatCard icon={FiClock} label="Pending Reviews" value={pendingCount} trend={useSampleData ? '2 awaiting' : 'Queue'} trendDirection="neutral" />
       </div>
 
+      {/* How It Works Section - Enhancement 4 */}
+      <HowItWorksFlow />
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <Card className="lg:col-span-3 backdrop-blur-[16px] bg-white/75 border border-white/[0.18] shadow-md">
           <CardHeader className="pb-3">
@@ -594,9 +765,17 @@ function NewInspectionScreen({
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState('')
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [pipelineStep, setPipelineStep] = useState(-1)
+  const [pipelineComplete, setPipelineComplete] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropzoneRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const pipelineTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  const clearPipelineTimers = useCallback(() => {
+    pipelineTimersRef.current.forEach((t) => clearTimeout(t))
+    pipelineTimersRef.current = []
+  }, [])
 
   const handleFileSelect = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -636,6 +815,16 @@ function NewInspectionScreen({
     setIsAnalyzing(true)
     setError('')
     setUploadProgress(10)
+    setPipelineStep(0)
+    setPipelineComplete(false)
+    clearPipelineTimers()
+
+    // Schedule pipeline step advances
+    const t1 = setTimeout(() => setPipelineStep(1), 2000)
+    const t2 = setTimeout(() => setPipelineStep(2), 4000)
+    const t3 = setTimeout(() => setPipelineStep(3), 7000)
+    const t4 = setTimeout(() => setPipelineStep(4), 10000)
+    pipelineTimersRef.current = [t1, t2, t3, t4]
 
     try {
       setUploadProgress(20)
@@ -646,6 +835,8 @@ function NewInspectionScreen({
         setError('Upload failed. Please try again.')
         setIsAnalyzing(false)
         setUploadProgress(0)
+        setPipelineStep(-1)
+        clearPipelineTimers()
         return
       }
 
@@ -661,6 +852,8 @@ function NewInspectionScreen({
         setError(result.error || 'Analysis could not complete. Please try again.')
         setIsAnalyzing(false)
         setUploadProgress(0)
+        setPipelineStep(-1)
+        clearPipelineTimers()
         return
       }
 
@@ -691,11 +884,22 @@ function NewInspectionScreen({
         status: 'completed',
       }
 
+      // Mark pipeline complete
+      clearPipelineTimers()
+      setPipelineStep(4)
+      setPipelineComplete(true)
       setUploadProgress(100)
-      onInspectionComplete(newInspection)
+
+      // Brief delay to show completion before navigating
+      setTimeout(() => {
+        onInspectionComplete(newInspection)
+      }, 800)
     } catch (err) {
       setError('An unexpected error occurred. Please try again.')
       setUploadProgress(0)
+      setPipelineStep(-1)
+      setPipelineComplete(false)
+      clearPipelineTimers()
     } finally {
       setIsAnalyzing(false)
     }
@@ -754,6 +958,8 @@ function NewInspectionScreen({
                 <div className="space-y-3">
                   <div className="relative w-full max-h-48 overflow-hidden rounded-lg">
                     <img src={previewUrl} alt="Preview" className="w-full h-48 object-contain rounded-lg" />
+                    {/* Enhancement 5: Scan overlay during analysis */}
+                    {isAnalyzing && <ScanOverlay />}
                   </div>
                   <p className="text-sm text-muted-foreground">{selectedFile?.name}</p>
                   {!isAnalyzing && (
@@ -793,7 +999,18 @@ function NewInspectionScreen({
             </div>
           </div>
 
-          {isAnalyzing && (
+          {/* Enhancement 1: Process Pipeline */}
+          {pipelineStep >= 0 && (
+            <div className="border border-border/50 rounded-xl p-4 bg-muted/20">
+              <div className="flex items-center gap-2 mb-2">
+                <FiCpu size={14} className="text-primary" />
+                <span className="text-xs font-medium text-foreground">AI/ML Analysis Pipeline</span>
+              </div>
+              <ProcessPipeline currentStep={pipelineStep} isComplete={pipelineComplete} />
+            </div>
+          )}
+
+          {isAnalyzing && pipelineStep < 0 && (
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <FiLoader size={14} className="animate-spin" />
@@ -801,6 +1018,10 @@ function NewInspectionScreen({
               </div>
               <Progress value={uploadProgress} className="h-1.5" />
             </div>
+          )}
+
+          {isAnalyzing && pipelineStep >= 0 && (
+            <Progress value={uploadProgress} className="h-1.5" />
           )}
 
           {error && (
@@ -937,6 +1158,16 @@ function ReportDetailScreen({
   const defects = Array.isArray(inspection.defects) ? inspection.defects : []
   const recommendations = Array.isArray(inspection.recommendations) ? inspection.recommendations : []
 
+  // Enhancement 3: Compute total affected area
+  const totalAffectedArea = defects.reduce((acc, d) => acc + (d?.affected_area_percentage ?? 0), 0)
+
+  // Enhancement 3: Defect distribution data for donut
+  const defectDistribution = [
+    { name: 'Critical', value: inspection.criticalCount ?? 0, color: '#ef4444' },
+    { name: 'Major', value: inspection.majorCount ?? 0, color: '#f97316' },
+    { name: 'Minor', value: inspection.minorCount ?? 0, color: '#eab308' },
+  ].filter(d => d.value > 0)
+
   return (
     <div className="relative">
       <div className="flex items-center gap-3 mb-5">
@@ -1022,42 +1253,128 @@ function ReportDetailScreen({
             </CardContent>
           </Card>
 
-          {/* Defect Summary */}
+          {/* Enhancement 2: Object Identification Section */}
+          <Card className="backdrop-blur-[16px] bg-white/75 border border-white/[0.18] shadow-md overflow-hidden">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <FiLayers size={14} className="text-primary" />
+                <CardTitle className="text-sm">Object Identification</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-4 space-y-3">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <FiBox size={20} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Material Identified</p>
+                  <p className="text-base font-bold text-foreground">{inspection.fabricType ?? 'Unknown'}</p>
+                </div>
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs shrink-0">
+                  <FiCheckCircle size={10} className="mr-1 inline" />
+                  Confirmed
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Fabric Type</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">{inspection.fabricType ?? 'N/A'}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Condition</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">{inspection.fabricCondition || 'N/A'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Defect Summary with Enhancement 3: Heatmap Bar + Affected Area */}
           <Card className="backdrop-blur-[16px] bg-white/75 border border-white/[0.18] shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Defect Summary</CardTitle>
             </CardHeader>
-            <CardContent className="pb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl font-bold text-foreground">{inspection.totalDefects}</span>
-                <span className="text-sm text-muted-foreground">total defects</span>
+            <CardContent className="pb-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-foreground">{inspection.totalDefects}</span>
+                  <span className="text-sm text-muted-foreground">total defects</span>
+                </div>
+                {totalAffectedArea > 0 && (
+                  <div className="text-right">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Total Affected</p>
+                    <p className="text-lg font-bold text-foreground">{totalAffectedArea.toFixed(1)}%</p>
+                  </div>
+                )}
               </div>
               <div className="flex flex-wrap gap-2">
-                {inspection.criticalCount > 0 && (
+                {(inspection.criticalCount ?? 0) > 0 && (
                   <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200 text-xs">
                     {inspection.criticalCount} Critical
                   </Badge>
                 )}
-                {inspection.majorCount > 0 && (
+                {(inspection.majorCount ?? 0) > 0 && (
                   <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-200 text-xs">
                     {inspection.majorCount} Major
                   </Badge>
                 )}
-                {inspection.minorCount > 0 && (
+                {(inspection.minorCount ?? 0) > 0 && (
                   <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200 text-xs">
                     {inspection.minorCount} Minor
                   </Badge>
                 )}
-                {inspection.totalDefects === 0 && (
+                {(inspection.totalDefects ?? 0) === 0 && (
                   <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 text-xs">
                     No defects found
                   </Badge>
                 )}
               </div>
+
+              {/* Enhancement 3: Heatmap Bar */}
+              <DefectHeatmapBar
+                critical={inspection.criticalCount ?? 0}
+                major={inspection.majorCount ?? 0}
+                minor={inspection.minorCount ?? 0}
+              />
+
+              {/* Enhancement 3: Donut Chart */}
+              {defectDistribution.length > 0 && (
+                <div className="flex items-center justify-center pt-2">
+                  <ResponsiveContainer width={140} height={140}>
+                    <PieChart>
+                      <Pie
+                        data={defectDistribution}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={35}
+                        outerRadius={55}
+                        paddingAngle={3}
+                        dataKey="value"
+                        strokeWidth={0}
+                      >
+                        {defectDistribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '11px' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-1.5 ml-2">
+                    {defectDistribution.map((d) => (
+                      <div key={d.name} className="flex items-center gap-2 text-xs">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                        <span className="text-muted-foreground">{d.name}</span>
+                        <span className="font-semibold text-foreground">{d.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Defects List */}
+          {/* Defects List with Enhancement 3: Severity Indicator Bar */}
           <Card className="backdrop-blur-[16px] bg-white/75 border border-white/[0.18] shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Detected Defects</CardTitle>
@@ -1072,19 +1389,29 @@ function ReportDetailScreen({
                 <ScrollArea className="max-h-64">
                   <div className="p-3 space-y-2">
                     {defects.map((defect, idx) => (
-                      <div key={defect?.id ?? idx} className="p-3 rounded-lg bg-muted/40 border border-border/50 space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-foreground">{defect?.type ?? 'Unknown'}</span>
-                          <Badge variant="outline" className={`text-xs ${getSeverityColor(defect?.severity ?? '')}`}>
-                            {defect?.severity ?? 'N/A'}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{defect?.description ?? ''}</p>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>Location: {defect?.location ?? 'N/A'}</span>
-                          {(defect?.affected_area_percentage ?? 0) > 0 && (
-                            <span>Area: {defect.affected_area_percentage}%</span>
-                          )}
+                      <div
+                        key={defect?.id ?? idx}
+                        className="rounded-lg bg-muted/40 border border-border/50 space-y-1.5 overflow-hidden flex"
+                      >
+                        {/* Enhancement 3: Severity indicator bar on left */}
+                        <div
+                          className="w-1 shrink-0 rounded-l-lg"
+                          style={{ backgroundColor: getSeverityBorderColor(defect?.severity ?? '') }}
+                        />
+                        <div className="p-3 flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-foreground">{defect?.type ?? 'Unknown'}</span>
+                            <Badge variant="outline" className={`text-xs ${getSeverityColor(defect?.severity ?? '')}`}>
+                              {defect?.severity ?? 'N/A'}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{defect?.description ?? ''}</p>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>Location: {defect?.location ?? 'N/A'}</span>
+                            {(defect?.affected_area_percentage ?? 0) > 0 && (
+                              <span>Area: {defect.affected_area_percentage}%</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1505,6 +1832,22 @@ class PageErrorBoundary extends React.Component<
   }
 }
 
+// --- Inline Keyframe Styles ---
+function InlineAnimationStyles() {
+  return (
+    <style dangerouslySetInnerHTML={{ __html: `
+      @keyframes scanline {
+        0% { top: 0; }
+        100% { top: 100%; }
+      }
+      @keyframes pulse-border {
+        0%, 100% { border-color: hsl(222 47% 11% / 0.2); }
+        50% { border-color: hsl(222 47% 11% / 0.7); }
+      }
+    `}} />
+  )
+}
+
 // --- Main Page ---
 export default function Page() {
   const [currentScreen, setCurrentScreen] = useState('dashboard')
@@ -1537,6 +1880,7 @@ export default function Page() {
 
   return (
     <PageErrorBoundary>
+      <InlineAnimationStyles />
       <div className="min-h-screen bg-gradient-to-br from-[hsl(210,20%,97%)] via-[hsl(220,25%,95%)] to-[hsl(200,20%,96%)] text-foreground flex">
         {/* Sidebar */}
         <div className="hidden md:flex">
