@@ -1,0 +1,22 @@
+{
+  "agents": {
+    "defect_detection_agent": {
+      "agent_id": "699c70cd3aff77bf1a4ebe04",
+      "name": "Defect Detection Agent",
+      "provider": "google",
+      "model": "gemini-2.5-pro",
+      "has_image_output": true,
+      "has_voice": false,
+      "has_file_output": false
+    },
+    "inspection_advisor_agent": {
+      "agent_id": "699c70cdf75ee4297f34ba9e",
+      "name": "Inspection Advisor Agent",
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "has_image_output": false,
+      "has_voice": false,
+      "has_file_output": false
+    }
+  }
+}

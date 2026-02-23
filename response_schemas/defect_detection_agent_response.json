@@ -1,0 +1,74 @@
+{
+  "agent_name": "Defect Detection Agent",
+  "agent_id": "699c70cd3aff77bf1a4ebe04",
+  "description": "Analyzes uploaded textile images to identify defects (tears, stains, weaving faults, color inconsistencies, pilling), classifies each defect by type and severity (critical/major/minor), maps defect locations, and generates a structured quality inspection report with pass/fail determination. Also generates annotated images highlighting detected defect locations.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "inspection_summary": {
+      "quality_score": "number",
+      "verdict": "string",
+      "total_defects": "number",
+      "critical_count": "number",
+      "major_count": "number",
+      "minor_count": "number",
+      "fabric_condition": "string"
+    },
+    "defects": [
+      {
+        "id": "number",
+        "type": "string",
+        "severity": "string",
+        "location": "string",
+        "description": "string",
+        "affected_area_percentage": "number"
+      }
+    ],
+    "recommendations": [
+      {
+        "defect_id": "number",
+        "action": "string",
+        "priority": "string",
+        "details": "string"
+      }
+    ]
+  },
+  "example_response": {
+    "inspection_summary": {
+      "quality_score": 0,
+      "verdict": "sample string",
+      "total_defects": 0,
+      "critical_count": 0,
+      "major_count": 0,
+      "minor_count": 0,
+      "fabric_condition": "sample string"
+    },
+    "defects": [
+      {
+        "id": 0,
+        "type": "sample string",
+        "severity": "sample string",
+        "location": "sample string",
+        "description": "sample string",
+        "affected_area_percentage": 0
+      }
+    ],
+    "recommendations": [
+      {
+        "defect_id": 0,
+        "action": "sample string",
+        "priority": "sample string",
+        "details": "sample string"
+      }
+    ]
+  },
+  "has_module_outputs": true,
+  "module_outputs_example": {
+    "artifact_files": [
+      {
+        "file_url": "https://example.com/image.png"
+      }
+    ]
+  }
+}

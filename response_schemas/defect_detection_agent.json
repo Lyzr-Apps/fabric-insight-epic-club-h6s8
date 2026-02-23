@@ -1,0 +1,35 @@
+{
+  "agent_name": "Defect Detection Agent",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": true,
+  "response_schema": {
+    "inspection_summary": {
+      "quality_score": "number",
+      "verdict": "string (Pass/Conditional Pass/Fail)",
+      "total_defects": "number",
+      "critical_count": "number",
+      "major_count": "number",
+      "minor_count": "number",
+      "fabric_condition": "string"
+    },
+    "defects": [
+      {
+        "id": "number",
+        "type": "string",
+        "severity": "string (critical/major/minor)",
+        "location": "string",
+        "description": "string",
+        "affected_area_percentage": "number"
+      }
+    ],
+    "recommendations": [
+      {
+        "defect_id": "number",
+        "action": "string",
+        "priority": "string",
+        "details": "string"
+      }
+    ]
+  }
+}

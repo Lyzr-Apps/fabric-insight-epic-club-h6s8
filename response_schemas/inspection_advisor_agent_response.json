@@ -1,0 +1,46 @@
+{
+  "agent_name": "Inspection Advisor Agent",
+  "agent_id": "699c70cdf75ee4297f34ba9e",
+  "description": "Answers follow-up questions about completed inspection results, explains defect causes, suggests corrective/preventive actions, and provides textile manufacturing best practices for quality improvement.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "answer": "string",
+    "key_points": [
+      "string"
+    ],
+    "corrective_actions": [
+      {
+        "action": "string",
+        "priority": "string",
+        "expected_impact": "string"
+      }
+    ],
+    "preventive_measures": [
+      "string"
+    ],
+    "industry_references": [
+      "string"
+    ]
+  },
+  "example_response": {
+    "answer": "sample string",
+    "key_points": [
+      "sample string"
+    ],
+    "corrective_actions": [
+      {
+        "action": "sample string",
+        "priority": "sample string",
+        "expected_impact": "sample string"
+      }
+    ],
+    "preventive_measures": [
+      "sample string"
+    ],
+    "industry_references": [
+      "sample string"
+    ]
+  }
+}

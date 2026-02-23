@@ -1,0 +1,19 @@
+{
+  "agent_name": "Inspection Advisor Agent",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": false,
+  "response_schema": {
+    "answer": "string",
+    "key_points": ["string"],
+    "corrective_actions": [
+      {
+        "action": "string",
+        "priority": "string",
+        "expected_impact": "string"
+      }
+    ],
+    "preventive_measures": ["string"],
+    "industry_references": ["string"]
+  }
+}
